@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"path/filepath"
 )
@@ -20,6 +21,10 @@ func (m *Videostich) Stitch(ctx context.Context, srcDir *Directory) (*File, erro
 		if filepath.Ext(f) == ".mp4" {
 			mp4s = append(mp4s, f)
 		}
+	}
+
+	if len(mp4s) == 0 {
+		return nil, errors.New("no mp4 files found to process")
 	}
 
 	ffc := dag.Container().From("jrottenberg/ffmpeg")
