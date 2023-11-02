@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 )
 
-type Videostich struct{}
+type Videostitch struct{}
 
 // example usage: "dagger call container-echo --string-arg yo"
-func (m *Videostich) Stitch(ctx context.Context, srcDir *Directory) (*File, error) {
+func (m *Videostitch) Stitch(ctx context.Context, srcDir *Directory) (*File, error) {
 	files, err := srcDir.Entries(ctx)
 	if err != nil {
 		return nil, err
