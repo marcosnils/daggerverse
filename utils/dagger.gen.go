@@ -1210,6 +1210,40 @@ func (r *Container) WithFile(path string, source *File, opts ...ContainerWithFil
 	}
 }
 
+// ContainerWithFilesOpts contains options for Container.WithFiles
+type ContainerWithFilesOpts struct {
+	// Permission given to the copied files (e.g., 0600).
+	Permissions int
+	// A user:group to set for the files.
+	//
+	// The user and group can either be an ID (1000:1000) or a name (foo:bar).
+	//
+	// If the group is omitted, it defaults to the same as the user.
+	Owner string
+}
+
+// Retrieves this container plus the contents of the given files copied to the given path.
+func (r *Container) WithFiles(path string, sources []*File, opts ...ContainerWithFilesOpts) *Container {
+	q := r.q.Select("withFiles")
+	for i := len(opts) - 1; i >= 0; i-- {
+		// `permissions` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Permissions) {
+			q = q.Arg("permissions", opts[i].Permissions)
+		}
+		// `owner` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Owner) {
+			q = q.Arg("owner", opts[i].Owner)
+		}
+	}
+	q = q.Arg("path", path)
+	q = q.Arg("sources", sources)
+
+	return &Container{
+		q: q,
+		c: r.c,
+	}
+}
+
 // Indicate that subsequent operations should be featured more prominently in the UI.
 func (r *Container) WithFocus() *Container {
 	q := r.q.Select("withFocus")
@@ -2116,6 +2150,30 @@ func (r *Directory) WithFile(path string, source *File, opts ...DirectoryWithFil
 	}
 	q = q.Arg("path", path)
 	q = q.Arg("source", source)
+
+	return &Directory{
+		q: q,
+		c: r.c,
+	}
+}
+
+// DirectoryWithFilesOpts contains options for Directory.WithFiles
+type DirectoryWithFilesOpts struct {
+	// Permission given to the copied files (e.g., 0600).
+	Permissions int
+}
+
+// Retrieves this directory plus the contents of the given files copied to the given path.
+func (r *Directory) WithFiles(path string, sources []*File, opts ...DirectoryWithFilesOpts) *Directory {
+	q := r.q.Select("withFiles")
+	for i := len(opts) - 1; i >= 0; i-- {
+		// `permissions` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Permissions) {
+			q = q.Arg("permissions", opts[i].Permissions)
+		}
+	}
+	q = q.Arg("path", path)
+	q = q.Arg("sources", sources)
 
 	return &Directory{
 		q: q,
@@ -6691,41 +6749,27 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 	switch parentName {
 	case "Utils":
 		switch fnName {
-		case "ContainerEcho":
+		case "WithCommands":
 			var parent Utils
 			err = json.Unmarshal(parentJSON, &parent)
 			if err != nil {
 				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
 			}
-			var stringArg string
-			if inputArgs["stringArg"] != nil {
-				err = json.Unmarshal([]byte(inputArgs["stringArg"]), &stringArg)
+			var c *Container
+			if inputArgs["c"] != nil {
+				err = json.Unmarshal([]byte(inputArgs["c"]), &c)
 				if err != nil {
-					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg stringArg", err))
+					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg c", err))
 				}
 			}
-			return (*Utils).ContainerEcho(&parent, stringArg), nil
-		case "GrepDir":
-			var parent Utils
-			err = json.Unmarshal(parentJSON, &parent)
-			if err != nil {
-				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
-			}
-			var directoryArg *Directory
-			if inputArgs["directoryArg"] != nil {
-				err = json.Unmarshal([]byte(inputArgs["directoryArg"]), &directoryArg)
+			var cmds [][]string
+			if inputArgs["cmds"] != nil {
+				err = json.Unmarshal([]byte(inputArgs["cmds"]), &cmds)
 				if err != nil {
-					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg directoryArg", err))
+					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg cmds", err))
 				}
 			}
-			var pattern string
-			if inputArgs["pattern"] != nil {
-				err = json.Unmarshal([]byte(inputArgs["pattern"]), &pattern)
-				if err != nil {
-					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg pattern", err))
-				}
-			}
-			return (*Utils).GrepDir(&parent, ctx, directoryArg, pattern)
+			return (*Utils).WithCommands(&parent, c, cmds)
 		default:
 			return nil, fmt.Errorf("unknown function %s", fnName)
 		}
@@ -6734,16 +6778,10 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 			WithObject(
 				dag.TypeDef().WithObject("Utils").
 					WithFunction(
-						dag.Function("ContainerEcho",
+						dag.Function("WithCommands",
 							dag.TypeDef().WithObject("Container")).
-							WithDescription("example usage: \"dagger call container-echo --string-arg yo stdout\"").
-							WithArg("stringArg", dag.TypeDef().WithKind(StringKind))).
-					WithFunction(
-						dag.Function("GrepDir",
-							dag.TypeDef().WithKind(StringKind)).
-							WithDescription("example usage: \"dagger call grep-dir --directory-arg . --pattern GrepDir\"").
-							WithArg("directoryArg", dag.TypeDef().WithObject("Directory")).
-							WithArg("pattern", dag.TypeDef().WithKind(StringKind)))), nil
+							WithArg("c", dag.TypeDef().WithObject("Container")).
+							WithArg("cmds", dag.TypeDef().WithListOf(dag.TypeDef().WithListOf(dag.TypeDef().WithKind(StringKind)))))), nil
 	default:
 		return nil, fmt.Errorf("unknown object %s", parentName)
 	}
