@@ -1,0 +1,12 @@
+{
+  "name": "dapr",
+  "sdk": "go",
+  "dependencies": [
+    {
+      "name": "go",
+      "source": "github.com/sagikazarmark/daggerverse/go@bc2ccb71307797d3066a56e1e57d75205523cfad"
+    }
+  ],
+  "source": ".",
+  "engineVersion": "v0.9.10"
+}
