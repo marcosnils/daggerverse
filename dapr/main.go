@@ -32,7 +32,7 @@ func (m *Dapr) Dapr(
 		args = append(args, "-app-channel-address", *appChannelAddress)
 	}
 
-	dapr := dag.Container().From("docker.io/daprio/daprd:1.13.0-rc.7").
+	dapr := dag.Container().From("docker.io/daprio/daprd:1.13.0-rc.2").
 		With(func(c *Container) *Container {
 			if componentsPath != nil {
 				c = c.WithDirectory("/components", componentsPath)
