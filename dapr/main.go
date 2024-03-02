@@ -11,6 +11,7 @@ type Dapr struct {
 
 func New(
 	// dapr image to use
+	// +optional
 	// +default="docker.io/daprio/daprd:1.13.0-rc.7"
 	image string,
 ) *Dapr {
