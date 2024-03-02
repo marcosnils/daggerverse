@@ -5,7 +5,17 @@ import (
 	"strconv"
 )
 
-type Dapr struct{}
+type Dapr struct {
+	image string
+}
+
+func New(
+	// dapr image to use
+	// +default="docker.io/daprio/daprd:1.13.0-rc.7"
+	image string,
+) *Dapr {
+	return &Dapr{}
+}
 
 func (m *Dapr) Dapr(
 	ctx context.Context,
@@ -32,7 +42,7 @@ func (m *Dapr) Dapr(
 		args = append(args, "-app-channel-address", *appChannelAddress)
 	}
 
-	dapr := dag.Container().From("docker.io/daprio/daprd:1.13.0-rc.2").
+	dapr := dag.Container().From(m.image).
 		With(func(c *Container) *Container {
 			if componentsPath != nil {
 				c = c.WithDirectory("/components", componentsPath)
