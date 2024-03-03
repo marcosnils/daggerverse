@@ -6,7 +6,7 @@ import (
 )
 
 type Dapr struct {
-	image string
+	Image string
 }
 
 func New(
@@ -15,7 +15,7 @@ func New(
 	// +default="docker.io/daprio/daprd:1.13.0-rc.7"
 	image string,
 ) *Dapr {
-	return &Dapr{}
+	return &Dapr{Image: image}
 }
 
 func (m *Dapr) Dapr(
@@ -43,7 +43,7 @@ func (m *Dapr) Dapr(
 		args = append(args, "-app-channel-address", *appChannelAddress)
 	}
 
-	dapr := dag.Container().From(m.image).
+	dapr := dag.Container().From(m.Image).
 		With(func(c *Container) *Container {
 			if componentsPath != nil {
 				c = c.WithDirectory("/components", componentsPath)
