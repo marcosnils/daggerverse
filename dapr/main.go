@@ -1,3 +1,9 @@
+// A dapr module to setup a dagger sidecar in your applications
+//
+// This module allows injecting a dapr sidecar into your application so
+// you can use dapr features like service invocation, state management,
+// pub/sub, etc.
+
 package main
 
 import (

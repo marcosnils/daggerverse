@@ -1,3 +1,7 @@
+// container utils module
+
+// This file contains the container utils module, which is a set of functions that
+// can be used to modify a container and enhance its functionality in different ways.
 package main
 
 import (

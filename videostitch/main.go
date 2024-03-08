@@ -1,3 +1,9 @@
+// stitches multiple videos together
+
+// This is a simple example of a Dagger function that stitches multiple videos together using ffmpeg.
+// It takes a directory as input and looks for all .mp4 files in it. It then uses ffmpeg to
+// concatenate them into a single .mp4 file.
+
 package main
 
 import (
