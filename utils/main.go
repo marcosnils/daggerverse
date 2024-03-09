@@ -34,6 +34,20 @@ exit $?
 
 var logsCache = dag.CacheVolume("logs")
 
+// WithCommands takes a container and a slice of command arguments and returns a new container
+// with the specified commands. It generates a shell script based on the provided commands
+// and sets it as the entrypoint for the container. The commands are executed when the container
+// is started.
+//
+// If the bash executable is not present, an error will be returned.
+//
+// Parameters:
+//   - c: The original container.
+//   - cmds: A slice of command arguments. Each command is represented as a slice of strings.
+//
+// Returns:
+//   - A new container with the specified commands.
+//   - An error if the bash executable is not present.
 func (m *Utils) WithCommands(c *Container, cmds [][]string) (*Container, error) {
 	// TODO check if bash is present and return more meaningful error
 

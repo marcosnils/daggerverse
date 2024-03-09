@@ -24,6 +24,7 @@ func New(
 	return &Dapr{Image: image}
 }
 
+// Dapr creates a new Dapr container with the specified configuration.
 func (m *Dapr) Dapr(
 	ctx context.Context,
 	appId string,
