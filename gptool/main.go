@@ -1,16 +1,9 @@
-// A generated module for Asktube functions
+// A toolbox of GPT functions for fun
 //
-// This module has been generated via dagger init and serves as a reference to
-// basic module structure as you get started with Dagger.
-//
-// Two functions have been pre-created. You can modify, delete, or add to them,
-// as needed. They demonstrate usage of arguments and return types using simple
-// echo and grep commands. The functions can be called from the dagger CLI or
-// from one of the SDKs.
-//
-// The first line in this comment block is a short description line and the
-// rest is a long description with more detail on the module's purpose or usage,
-// if appropriate. All modules should have a short description.
+// This module serves as toolbox with different GPT related functions that can
+// be used to interact with GPT models. The functions are designed to be used
+// either in a stand-alone manner or in combination with other functions for
+// more elaborated pipelines.
 
 package main
 
@@ -37,7 +30,7 @@ func New() *GPTools {
 	}
 }
 
-// Returns a container that echoes whatever string argument is provided
+// Runs a RAG model on the provided source directory and question
 func (m *GPTools) RAG(openaiApiKey *Secret, source *Directory, question string) (string, error) {
 	return m.BaseCtr.
 		WithExec([]string{"apt", "update"}).WithExec([]string{"apt", "install", "-y", "build-essential"}).
@@ -48,18 +41,18 @@ func (m *GPTools) RAG(openaiApiKey *Secret, source *Directory, question string) 
 		WithExec([]string{"llamaindex-cli", "rag", "-v", "--files", "/files", "-q", question}).Stdout(context.Background())
 }
 
-// Returns a container that echoes whatever string argument is provided
+// Asks a question to a youtube video
 func (m *GPTools) YtChat(openaiApiKey *Secret, url, question string) (string, error) {
-	t := m.Transcript(url)
+	a := m.Audio(url)
+	t := m.Transcript(a)
 	d := dag.Directory().WithFile("yt-transcript.txt", t)
 	return m.RAG(openaiApiKey, d, question)
 }
 
-// Returns the video audio as an mp3 encoded file
-func (m *GPTools) Transcript(url string) *File {
-	audio := m.Audio(url)
+// Returns the video transcript as a txt file
+func (m *GPTools) Transcript(src *File) *File {
 	return m.YTCtr.WithExec([]string{"pip", "install", "openai-whisper"}).
-		WithMountedFile("audio.mp3", audio).
+		WithMountedFile("audio.mp3", src).
 		WithMountedCache("/root/.cache/whisper", dag.CacheVolume("whisper")).
 		WithExec([]string{"whisper", "audio.mp3", "--model", "base", "--fp16", "False", "-f", "txt"}).
 		File("audio.txt")
