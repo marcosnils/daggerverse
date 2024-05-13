@@ -1,0 +1,12 @@
+{
+  "name": "examples",
+  "sdk": "go",
+  "dependencies": [
+    {
+      "name": "gptools",
+      "source": ".."
+    }
+  ],
+  "source": ".",
+  "engineVersion": "v0.11.4"
+}
