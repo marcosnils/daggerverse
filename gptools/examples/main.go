@@ -26,7 +26,6 @@ func (m *Examples) GptoolsTranscript_Directory(
 	url string,
 ) *Directory {
 	video := dag.HTTP(url)
-	// return dag.Gptools().Transcript(video).Contents(ctx)
 	return dag.Directory().WithFile("video-transcript.txt",
 		dag.Gptools().Transcript(video))
 }
