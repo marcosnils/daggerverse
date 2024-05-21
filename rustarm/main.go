@@ -53,5 +53,5 @@ func (m *Rustarm) PatchedRingArmv6() *Directory {
 func (m *Rustarm) base() *Container {
 	return dag.Container().From("ubuntu:22.04").
 		WithExec([]string{"apt", "update"}).
-		WithExec([]string{"apt", "install", "-y", "curl", "git"})
+		WithExec([]string{"apt", "install", "-y", "curl", "git", "build-essential"})
 }
