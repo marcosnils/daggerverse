@@ -1,9 +1,10 @@
 {
   "name": "rustarm",
   "sdk": "go",
-  "engineVersion": "v0.11.4",
   "exclude": [
     "target",
     ".git"
-  ]
+  ],
+  "source": ".",
+  "engineVersion": "v0.11.4"
 }
