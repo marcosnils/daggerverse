@@ -16,3 +16,17 @@ func (m *Examples) GptoolsTranscript(
 	video := dag.HTTP(url)
 	return dag.Gptools().Transcript(video).Contents(ctx)
 }
+
+// example on how to get a transcript for a video and
+// return it as a *Directory to use in other functions
+func (m *Examples) GptoolsTranscript_Directory(
+	ctx context.Context,
+	// free to use movie https://mango.blender.org/about/
+	//+default="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
+	url string,
+) *Directory {
+	video := dag.HTTP(url)
+	// return dag.Gptools().Transcript(video).Contents(ctx)
+	return dag.Directory().WithFile("video-transcript.txt",
+		dag.Gptools().Transcript(video))
+}
