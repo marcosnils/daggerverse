@@ -6,6 +6,25 @@ import (
 
 type Examples struct{}
 
+// example on how to run a full e2e RAG model across different types of
+// documents in a directory
+func (m *Examples) Gptools(
+	ctx context.Context,
+	openaiApiKey *Secret,
+	//+default="who are the authors of the nix paper?"
+	question string,
+) (string, error) {
+	nixPaper := dag.HTTP("https://edolstra.github.io/pubs/nspfssd-lisa2004-final.pdf")
+	foxImage := dag.HTTP("https://fsquaredmarketing.com/wp-content/uploads/2024/04/bitter-font.png")
+	return dag.Gptools().Rag(ctx,
+		openaiApiKey,
+		dag.Directory().
+			WithFile("nix-paper.pdf", nixPaper).
+			WithFile("image.png", foxImage),
+		question,
+	)
+}
+
 // example on how to return a transcript from a video file
 func (m *Examples) GptoolsTranscript(
 	ctx context.Context,
@@ -26,6 +45,6 @@ func (m *Examples) GptoolsTranscript_Directory(
 	url string,
 ) *Directory {
 	video := dag.HTTP(url)
-	return dag.Directory().WithFile("video-transcript.txt",
-		dag.Gptools().Transcript(video))
+	return dag.Directory().
+		WithFile("video-transcript.txt", dag.Gptools().Transcript(video))
 }
