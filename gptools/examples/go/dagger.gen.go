@@ -660,6 +660,27 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 	switch parentName {
 	case "Examples":
 		switch fnName {
+		case "Gptools":
+			var parent Examples
+			err = json.Unmarshal(parentJSON, &parent)
+			if err != nil {
+				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
+			}
+			var openaiApiKey *Secret
+			if inputArgs["openaiApiKey"] != nil {
+				err = json.Unmarshal([]byte(inputArgs["openaiApiKey"]), &openaiApiKey)
+				if err != nil {
+					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg openaiApiKey", err))
+				}
+			}
+			var question string
+			if inputArgs["question"] != nil {
+				err = json.Unmarshal([]byte(inputArgs["question"]), &question)
+				if err != nil {
+					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg question", err))
+				}
+			}
+			return (*Examples).Gptools(&parent, ctx, openaiApiKey, question)
 		case "GptoolsTranscript":
 			var parent Examples
 			err = json.Unmarshal(parentJSON, &parent)
@@ -674,6 +695,20 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 				}
 			}
 			return (*Examples).GptoolsTranscript(&parent, ctx, url)
+		case "GptoolsTranscript_Directory":
+			var parent Examples
+			err = json.Unmarshal(parentJSON, &parent)
+			if err != nil {
+				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
+			}
+			var url string
+			if inputArgs["url"] != nil {
+				err = json.Unmarshal([]byte(inputArgs["url"]), &url)
+				if err != nil {
+					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg url", err))
+				}
+			}
+			return (*Examples).GptoolsTranscript_Directory(&parent, ctx, url), nil
 		default:
 			return nil, fmt.Errorf("unknown function %s", fnName)
 		}
@@ -682,9 +717,20 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 			WithObject(
 				dag.TypeDef().WithObject("Examples").
 					WithFunction(
+						dag.Function("Gptools",
+							dag.TypeDef().WithKind(StringKind)).
+							WithDescription("example on how to run a full e2e RAG model across different types of\ndocuments in a directory").
+							WithArg("openaiApiKey", dag.TypeDef().WithObject("Secret")).
+							WithArg("question", dag.TypeDef().WithKind(StringKind), FunctionWithArgOpts{DefaultValue: JSON("\"who are the authors of the nix paper?\"")})).
+					WithFunction(
 						dag.Function("GptoolsTranscript",
 							dag.TypeDef().WithKind(StringKind)).
 							WithDescription("example on how to return a transcript from a video file").
+							WithArg("url", dag.TypeDef().WithKind(StringKind), FunctionWithArgOpts{Description: "free to use movie https://mango.blender.org/about/", DefaultValue: JSON("\"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4\"")})).
+					WithFunction(
+						dag.Function("GptoolsTranscript_Directory",
+							dag.TypeDef().WithObject("Directory")).
+							WithDescription("example on how to get a transcript for a video and\nreturn it as a *Directory to use in other functions").
 							WithArg("url", dag.TypeDef().WithKind(StringKind), FunctionWithArgOpts{Description: "free to use movie https://mango.blender.org/about/", DefaultValue: JSON("\"http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4\"")}))), nil
 	default:
 		return nil, fmt.Errorf("unknown object %s", parentName)
