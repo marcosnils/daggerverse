@@ -1,0 +1,12 @@
+{
+  "name": "examples",
+  "sdk": "typescript",
+  "dependencies": [
+    {
+      "name": "gptools",
+      "source": "../.."
+    }
+  ],
+  "source": ".",
+  "engineVersion": "v0.11.5"
+}
