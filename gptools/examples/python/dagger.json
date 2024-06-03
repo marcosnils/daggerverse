@@ -1,0 +1,12 @@
+{
+  "name": "python",
+  "sdk": "python",
+  "dependencies": [
+    {
+      "name": "gptools",
+      "source": "../.."
+    }
+  ],
+  "source": ".",
+  "engineVersion": "v0.11.6"
+}
