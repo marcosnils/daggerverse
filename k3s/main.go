@@ -59,7 +59,6 @@ func New(name string) *K3S {
 		WithMountedTemp("/var/lib/kubelet").
 		WithMountedTemp("/var/lib/rancher/k3s").
 		WithMountedTemp("/var/log").
-		WithExec([]string{"sh", "-c", "k3s server --bind-address $(ip route | grep src | awk '{print $NF}') --disable traefik --disable metrics-server"}, ContainerWithExecOpts{InsecureRootCapabilities: true}).
 		WithExposedPort(6443)
 	return &K3S{
 		Name:        name,
@@ -70,7 +69,15 @@ func New(name string) *K3S {
 
 // Returns a newly initialized kind cluster
 func (m *K3S) Server() *Service {
-	return m.Container.AsService()
+	return m.Container.
+		WithExec([]string{"sh", "-c", "k3s server --bind-address $(ip route | grep src | awk '{print $NF}') --disable traefik --disable metrics-server"}, ContainerWithExecOpts{InsecureRootCapabilities: true}).
+		AsService()
+}
+
+// Returns a newly initialized kind cluster
+func (m *K3S) WithContainer(c *Container) *K3S {
+	m.Container = c
+	return m
 }
 
 // returns the config file for the k3s cluster
