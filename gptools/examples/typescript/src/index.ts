@@ -7,7 +7,7 @@ class Examples {
    * documents in a directory
    */
   @func()
-  gptools(openaiApiKey: Secret, question: string): Promise<string> {
+  gptools_rag(openaiApiKey: Secret, question: string): Promise<string> {
     const nixPaper = dag.http(
       "https://edolstra.github.io/pubs/nspfssd-lisa2004-final.pdf",
     );

@@ -8,7 +8,7 @@ type Examples struct{}
 
 // example on how to run a full e2e RAG model across different types of
 // documents in a directory
-func (m *Examples) Gptools(
+func (m *Examples) Gptools_Rag(
 	ctx context.Context,
 	openaiApiKey *Secret,
 	//+default="who are the authors of the nix paper?"

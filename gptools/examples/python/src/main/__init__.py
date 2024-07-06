@@ -6,7 +6,7 @@ from collections.abc import Coroutine
 @object_type
 class Python:
     @function
-    async def gptools(
+    async def gptools__rag(
         self,
         openai_api_key: dagger.Secret,
         question: str,
