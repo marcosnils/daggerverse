@@ -7,11 +7,7 @@ type Windows struct {
 	Ctr *dagger.Container
 }
 
-func New() *Windows {
-	return &Windows{Ctr: dag.Container().From("dockurr/windows")}
-}
-
-func (m *Windows) Service(
+func New(
 	// +optional
 	// +default="win11"
 	version string,
@@ -24,14 +20,19 @@ func (m *Windows) Service(
 	// +optional
 	// +default="64G"
 	disk string,
-) *dagger.Service {
-	return m.Ctr.
-		WithExposedPort(8006).
-		WithEnvVariable("VERSION", version).
-		WithEnvVariable("RAM_SIZE", ram).
-		WithEnvVariable("CPU_CORES", cpu).
-		WithEnvVariable("DISK_SIZE", disk).
-		WithMountedTemp("/storage").
-		WithExec([]string{"/usr/bin/tini", "-s", "/run/entry.sh"}, dagger.ContainerWithExecOpts{InsecureRootCapabilities: true}).
-		AsService()
+) *Windows {
+	return &Windows{
+		Ctr: dag.Container().From("dockurr/windows").
+			WithExposedPort(8006).
+			WithEnvVariable("VERSION", version).
+			WithEnvVariable("RAM_SIZE", ram).
+			WithEnvVariable("CPU_CORES", cpu).
+			WithEnvVariable("DISK_SIZE", disk).
+			WithMountedTemp("/storage").
+			WithExec([]string{"/usr/bin/tini", "-s", "/run/entry.sh"}, dagger.ContainerWithExecOpts{InsecureRootCapabilities: true}),
+	}
+}
+
+func (m *Windows) Service() *dagger.Service {
+	return m.Ctr.AsService()
 }
