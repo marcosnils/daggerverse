@@ -70,7 +70,7 @@ func New(name string) *K3S {
 // Returns a newly initialized kind cluster
 func (m *K3S) Server() *Service {
 	return m.Container.
-		WithExec([]string{"sh", "-c", "k3s server --bind-address $(ip route | grep src | awk '{print $NF}') --disable traefik --disable metrics-server"}, ContainerWithExecOpts{InsecureRootCapabilities: true}).
+		WithExec([]string{"sh", "-c", "k3s server --bind-address $(ip route | grep src | awk '{print $NF}') --disable traefik --disable metrics-server --egress-selector-mode=disabled"}, ContainerWithExecOpts{InsecureRootCapabilities: true}).
 		AsService()
 }
 
@@ -110,4 +110,16 @@ func (m *K3S) Kubectl(ctx context.Context, args string) (string, error) {
 		WithFile("/.kube/config", m.Config(ctx, false), ContainerWithFileOpts{Permissions: 1001}).
 		WithUser("1001").
 		WithExec([]string{"sh", "-c", "kubectl " + args}).Stdout(ctx)
+}
+
+// runs k9s on the target k3s cluster
+func (m *K3S) Kns(ctx context.Context) *Container {
+	return dag.Container().
+		From("derailed/k9s").
+		WithoutEntrypoint().
+		WithMountedCache("/cache/k3s", m.ConfigCache).
+		WithEnvVariable("CACHE", time.Now().String()).
+		WithEnvVariable("KUBECONFIG", "/.kube/config").
+		WithFile("/.kube/config", m.Config(ctx, false), ContainerWithFileOpts{Permissions: 1001}).
+		WithDefaultTerminalCmd([]string{"k9s"})
 }
