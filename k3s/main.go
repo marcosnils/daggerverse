@@ -94,7 +94,8 @@ func (m *K3S) WithContainer(c *dagger.Container) *K3S {
 
 // returns the config file for the k3s cluster
 func (m *K3S) Config(ctx context.Context,
-	// default=false
+	// +optional
+	// +default=false
 	local bool,
 ) *dagger.File {
 	return dag.Container().
