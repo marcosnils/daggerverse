@@ -5,6 +5,8 @@ package main
 import (
 	"context"
 	"time"
+
+	"dagger/k-3-s/internal/dagger"
 )
 
 // entrypoint to setup cgroup nesting since k3s only does it
@@ -40,9 +42,9 @@ type K3S struct {
 	Name string
 
 	// +private
-	ConfigCache *CacheVolume
+	ConfigCache *dagger.CacheVolume
 
-	Container *Container
+	Container *dagger.Container
 }
 
 func New(
@@ -54,8 +56,7 @@ func New(
 	ccache := dag.CacheVolume("k3s_config_" + name)
 	ctr := dag.Container().
 		From(image).
-		WithNewFile("/usr/bin/entrypoint.sh", ContainerWithNewFileOpts{
-			Contents:    entrypoint,
+		WithNewFile("/usr/bin/entrypoint.sh", entrypoint, dagger.ContainerWithNewFileOpts{
 			Permissions: 0o755,
 		}).
 		WithEntrypoint([]string{"entrypoint.sh"}).
@@ -73,30 +74,37 @@ func New(
 }
 
 // Returns a newly initialized kind cluster
-func (m *K3S) Server() *Service {
+func (m *K3S) Server() *dagger.Service {
 	return m.Container.
-		WithExec([]string{"sh", "-c", "k3s server --bind-address $(ip route | grep src | awk '{print $NF}') --disable traefik --disable metrics-server --egress-selector-mode=disabled"}, ContainerWithExecOpts{InsecureRootCapabilities: true}).
+		WithExec([]string{
+			"sh", "-c",
+			"k3s server --bind-address $(ip route | grep src | awk '{print $NF}') --disable traefik --disable metrics-server --egress-selector-mode=disabled",
+		}, dagger.ContainerWithExecOpts{
+			UseEntrypoint:            true,
+			InsecureRootCapabilities: true,
+		}).
 		AsService()
 }
 
 // Returns a newly initialized kind cluster
-func (m *K3S) WithContainer(c *Container) *K3S {
+func (m *K3S) WithContainer(c *dagger.Container) *K3S {
 	m.Container = c
 	return m
 }
 
 // returns the config file for the k3s cluster
 func (m *K3S) Config(ctx context.Context,
-	// default=false
+	// +optional
+	// +default=false
 	local bool,
-) *File {
+) *dagger.File {
 	return dag.Container().
 		From("alpine").
 		// we need to bust the cache so we don't fetch the same file each time.
 		WithEnvVariable("CACHE", time.Now().String()).
 		WithMountedCache("/cache/k3s", m.ConfigCache).
 		WithExec([]string{"cp", "/cache/k3s/k3s.yaml", "k3s.yaml"}).
-		With(func(c *Container) *Container {
+		With(func(c *dagger.Container) *dagger.Container {
 			if local {
 				c = c.WithExec([]string{"sed", "-i", `s/https:.*:6443/https:\/\/localhost:6443/g`, "k3s.yaml"})
 			}
@@ -112,19 +120,19 @@ func (m *K3S) Kubectl(ctx context.Context, args string) (string, error) {
 		WithoutEntrypoint().
 		WithMountedCache("/cache/k3s", m.ConfigCache).
 		WithEnvVariable("CACHE", time.Now().String()).
-		WithFile("/.kube/config", m.Config(ctx, false), ContainerWithFileOpts{Permissions: 1001}).
+		WithFile("/.kube/config", m.Config(ctx, false), dagger.ContainerWithFileOpts{Permissions: 1001}).
 		WithUser("1001").
 		WithExec([]string{"sh", "-c", "kubectl " + args}).Stdout(ctx)
 }
 
 // runs k9s on the target k3s cluster
-func (m *K3S) Kns(ctx context.Context) *Container {
+func (m *K3S) Kns(ctx context.Context) *dagger.Container {
 	return dag.Container().
 		From("derailed/k9s").
 		WithoutEntrypoint().
 		WithMountedCache("/cache/k3s", m.ConfigCache).
 		WithEnvVariable("CACHE", time.Now().String()).
 		WithEnvVariable("KUBECONFIG", "/.kube/config").
-		WithFile("/.kube/config", m.Config(ctx, false), ContainerWithFileOpts{Permissions: 1001}).
+		WithFile("/.kube/config", m.Config(ctx, false), dagger.ContainerWithFileOpts{Permissions: 1001}).
 		WithDefaultTerminalCmd([]string{"k9s"})
 }
