@@ -22,7 +22,7 @@ import (
 type Examples struct{}
 
 // starts a k3s server with a local registry and a pre-loaded alpine image
-func (m *Examples) Server(ctx context.Context) (*Service, error) {
+func (m *Examples) K3SServer(ctx context.Context) (*Service, error) {
 	regSvc := dag.Container().From("registry:2.8").
 		WithExposedPort(5000).AsService()
 
@@ -50,6 +50,6 @@ EOF`}, ContainerWithExecOpts{SkipEntrypoint: true}).
 	}).Server(), nil
 }
 
-func (m *Examples) Kubectl(ctx context.Context, args string) (string, error) {
+func (m *Examples) K3SKubectl(ctx context.Context, args string) (string, error) {
 	return dag.K3S("test").Kubectl(ctx, args)
 }
