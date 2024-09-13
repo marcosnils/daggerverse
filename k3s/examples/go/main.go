@@ -54,7 +54,7 @@ func (m *Examples) K3SServer(ctx context.Context) (*dagger.Service, error) {
 	_, err := dag.Container().From("quay.io/skopeo/stable").
 		WithServiceBinding("registry", regSvc).
 		WithEnvVariable("BUST", time.Now().String()).
-		WithExec([]string{"copy", "--dest-tls-verify=false", "docker://docker.io/alpine:latest", "docker://registry:5000/alpine:latest"}).Sync(ctx)
+		WithExec([]string{"copy", "--dest-tls-verify=false", "docker://docker.io/alpine:latest", "docker://registry:5000/alpine:latest"}, dagger.ContainerWithExecOpts{UseEntrypoint: true}).Sync(ctx)
 	if err != nil {
 		return nil, err
 	}
