@@ -114,7 +114,7 @@ func (m *K3S) Config(ctx context.Context,
 }
 
 // runs kubectl on the target k3s cluster
-func (m *K3S) Kubectl(ctx context.Context, args string) (string, error) {
+func (m *K3S) Kubectl(ctx context.Context, args string) *dagger.Container {
 	return dag.Container().
 		From("bitnami/kubectl").
 		WithoutEntrypoint().
@@ -122,7 +122,7 @@ func (m *K3S) Kubectl(ctx context.Context, args string) (string, error) {
 		WithEnvVariable("CACHE", time.Now().String()).
 		WithFile("/.kube/config", m.Config(ctx, false), dagger.ContainerWithFileOpts{Permissions: 1001}).
 		WithUser("1001").
-		WithExec([]string{"sh", "-c", "kubectl " + args}).Stdout(ctx)
+		WithExec([]string{"sh", "-c", "kubectl " + args})
 }
 
 // runs k9s on the target k3s cluster
