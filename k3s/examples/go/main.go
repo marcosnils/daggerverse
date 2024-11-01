@@ -75,6 +75,8 @@ EOF`}).
 	}).Server(), nil
 }
 
-func (m *Examples) K3SKubectl(ctx context.Context, args string) (string, error) {
-	return dag.K3S("test").Kubectl(ctx, args)
+// returns a kubectl container with the configured kube config context ready to run
+// administrative commands
+func (m *Examples) K3SKubectl(ctx context.Context, args string) *dagger.Container {
+	return dag.K3S("test").Kubectl(args)
 }
