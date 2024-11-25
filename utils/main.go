@@ -6,6 +6,8 @@ package main
 
 import (
 	"bytes"
+	"context"
+	"main/internal/dagger"
 	"strings"
 	"text/template"
 )
@@ -48,7 +50,7 @@ var logsCache = dag.CacheVolume("logs")
 // Returns:
 //   - A new container with the specified commands.
 //   - An error if the bash executable is not present.
-func (m *Utils) WithCommands(c *Container, cmds [][]string) (*Container, error) {
+func (m *Utils) WithCommands(c *dagger.Container, cmds [][]string) (*dagger.Container, error) {
 	// TODO check if bash is present and return more meaningful error
 
 	// Create a new template and parse the letter into it.
@@ -65,11 +67,25 @@ func (m *Utils) WithCommands(c *Container, cmds [][]string) (*Container, error) 
 
 	t.Execute(b, strCmds)
 
-	return c.WithNewFile("/entrypoint.sh", ContainerWithNewFileOpts{
-		Contents:    b.String(),
+	return c.WithNewFile("/entrypoint.sh", b.String(), dagger.ContainerWithNewFileOpts{
 		Permissions: 0755,
 	}).
 		WithMountedCache("/tmp/jobs", logsCache).
 		WithEntrypoint([]string{"/entrypoint.sh"}).
 		WithExec(nil), nil
+}
+
+func (m *Utils) WithEnvVariables(ctx context.Context, c *dagger.Container, envs *dagger.Secret) *dagger.Container {
+
+	plainEnvs, _ := envs.Plaintext(ctx)
+
+	for _, e := range strings.Split(plainEnvs, "\n") {
+		e := strings.Split(e, "=")
+		if len(e) != 2 {
+			continue
+		}
+		c = c.WithEnvVariable(e[0], e[1])
+	}
+
+	return c
 }
