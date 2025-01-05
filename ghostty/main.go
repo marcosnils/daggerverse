@@ -53,7 +53,7 @@ func New(
 
 		base = dag.Container().From("ubuntu:"+ubuntuVersion).
 			WithExec([]string{"apt", "update"}).
-			WithExec([]string{"apt", "install", "--no-install-recommends", "-y", "ncurses-base", "xz-utils", "libgtk-4-dev", "libadwaita-1-dev"}).
+			WithExec([]string{"apt", "install", "--no-install-recommends", "-y", "ncurses-base", "xz-utils", "libgtk-4-dev", "libadwaita-1-dev", "ca-certificates"}).
 			WithMountedCache("/root/.cache/zig", dag.CacheVolume("zig-cache")).
 			WithFile("zig.tar.xz", zigBundle).
 			WithExec([]string{"mkdir", "/zig"}).
