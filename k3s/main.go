@@ -76,14 +76,14 @@ func New(
 // Returns a newly initialized kind cluster
 func (m *K3S) Server() *dagger.Service {
 	return m.Container.
-		WithExec([]string{
-			"sh", "-c",
-			"k3s server --bind-address $(ip route | grep src | awk '{print $NF}') --disable traefik --disable metrics-server --egress-selector-mode=disabled",
-		}, dagger.ContainerWithExecOpts{
-			UseEntrypoint:            true,
+		AsService(dagger.ContainerAsServiceOpts{
+			Args: []string{
+				"sh", "-c",
+				"k3s server --debug --bind-address $(ip route | grep src | awk '{print $NF}') --disable traefik --disable metrics-server --egress-selector-mode=disabled",
+			},
 			InsecureRootCapabilities: true,
-		}).
-		AsService()
+			UseEntrypoint:            true,
+		})
 }
 
 // Returns a newly initialized kind cluster
