@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"dagger/k-3-s/internal/dagger"
@@ -52,6 +53,11 @@ func New(
 	// +optional
 	// +default="rancher/k3s:latest"
 	image string,
+
+	// keeps the state of the cluster (not recommended).
+	// +optional
+	// +default="false"
+	keepState bool,
 ) *K3S {
 	ccache := dag.CacheVolume("k3s_config_" + name)
 	ctr := dag.Container().
@@ -64,6 +70,15 @@ func New(
 		WithMountedTemp("/etc/lib/cni").
 		WithMountedTemp("/var/lib/kubelet").
 		WithMountedCache("/var/lib/rancher", dag.CacheVolume("k3s_cache_"+name)).
+		WithEnvVariable("CACHEBUST", time.Now().String()).
+		WithExec([]string{"rm", "-rf", "/var/lib/rancher/k3s/server/tls", "/etc/rancher/k3s/k3s.yaml"}).
+		With(func(c *dagger.Container) *dagger.Container {
+			if !keepState {
+				c = c.WithExec([]string{"rm", "-rf", "/var/lib/rancher/k3s/"})
+
+			}
+			return c
+		}).
 		WithMountedTemp("/var/log").
 		WithExposedPort(6443)
 	return &K3S{
@@ -97,12 +112,15 @@ func (m *K3S) Config(ctx context.Context,
 	// +optional
 	// +default=false
 	local bool,
+
 ) *dagger.File {
+	const interval = 0.5
 	return dag.Container().
 		From("alpine").
 		// we need to bust the cache so we don't fetch the same file each time.
 		WithEnvVariable("CACHE", time.Now().String()).
 		WithMountedCache("/cache/k3s", m.ConfigCache).
+		WithExec([]string{"sh", "-c", `while [ ! -f "/cache/k3s/k3s.yaml" ]; do echo "k3s.yaml not ready, is sever started?. waiting.. " && sleep ` + fmt.Sprintf("%.1f", interval) + `; done`}).
 		WithExec([]string{"cp", "/cache/k3s/k3s.yaml", "k3s.yaml"}).
 		With(func(c *dagger.Container) *dagger.Container {
 			if local {
