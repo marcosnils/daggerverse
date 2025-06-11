@@ -1,4 +1,4 @@
-// A generated module for Sub functions
+// A generated module for Sub2 functions
 //
 // This module has been generated via dagger init and serves as a reference to
 // basic module structure as you get started with Dagger.
@@ -14,18 +14,11 @@
 
 package main
 
-import (
-	"context"
-	"fmt"
-)
+import "fmt"
 
-type Sub struct{}
+type Sub2 struct{}
 
 // Returns a container that echoes whatever string argument is provided
-func (m *Sub) SubTest(ctx context.Context) string {
-	fmt.Println("I'm withing calltest Subtest")
-
-	dag.Sub2().Sub2Test(ctx)
-
-	return "I'm within calltest subtest"
+func (m *Sub2) Sub2Test() {
+	fmt.Println("I'm in sub2")
 }
