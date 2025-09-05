@@ -63,7 +63,6 @@ func New(
 	keepState bool,
 
 	// enable traefik to be installed (not recommended).
-	// +optional
 	// +default="false"
 	enableTraefik bool,
 ) *K3S {
