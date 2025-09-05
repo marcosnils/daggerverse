@@ -45,7 +45,7 @@ type K3S struct {
 	// +private
 	ConfigCache *dagger.CacheVolume
 
-	// +priave
+	// +private
 	EnableTraefik bool
 
 	Container *dagger.Container
