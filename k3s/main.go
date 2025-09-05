@@ -45,6 +45,9 @@ type K3S struct {
 	// +private
 	ConfigCache *dagger.CacheVolume
 
+	// +private
+	EnableTraefik bool
+
 	Container *dagger.Container
 }
 
@@ -58,6 +61,10 @@ func New(
 	// +optional
 	// +default="false"
 	keepState bool,
+
+	// enable traefik to be installed (not recommended).
+	// +default="false"
+	enableTraefik bool,
 ) *K3S {
 	ccache := dag.CacheVolume("k3s_config_" + name)
 	ctr := dag.Container().
@@ -85,16 +92,21 @@ func New(
 		Name:        name,
 		ConfigCache: ccache,
 		Container:   ctr,
+		EnableTraefik: enableTraefik,
 	}
 }
 
 // Returns a newly initialized kind cluster
 func (m *K3S) Server() *dagger.Service {
+	traefikFlags := ""
+	if !m.EnableTraefik {
+		traefikFlags = "--disable traefik "
+	}
 	return m.Container.
 		AsService(dagger.ContainerAsServiceOpts{
 			Args: []string{
 				"sh", "-c",
-				"k3s server --debug --bind-address $(ip route | grep src | awk '{print $NF}') --disable traefik --disable metrics-server --egress-selector-mode=disabled",
+				"k3s server --debug --bind-address $(ip route | grep src | awk '{print $NF}') " + traefikFlags + "--disable metrics-server --egress-selector-mode=disabled",
 			},
 			InsecureRootCapabilities: true,
 			UseEntrypoint:            true,
