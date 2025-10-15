@@ -1,3 +1,5 @@
+// Dagger module whih allows calling the Discord API
+
 package main
 
 import (

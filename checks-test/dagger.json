@@ -1,0 +1,7 @@
+{
+  "name": "checks-test",
+  "engineVersion": "v0.19.3-010101000000-dev-74d80f61b921",
+  "sdk": {
+    "source": "go"
+  }
+}
