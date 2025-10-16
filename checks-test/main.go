@@ -7,7 +7,7 @@ type ChecksTest struct{}
 func (m *ChecksTest) CheckFoo() {
 	dag.Container().From("alpine:latest").
 		WithExec([]string{"apk", "add", "curl"}).
-		WithExec([]string{"curl", "https://webhook.site/e5f98516-478b-43e3-9512-7fb1963a5dde"}).Sync(context.Background())
+		WithExec([]string{"curl", "https://webhook.site/5b523f5e-1d50-40e3-9f69-6df44197011a"}).Sync(context.Background())
 
 	//foo
 }
