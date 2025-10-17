@@ -10,7 +10,7 @@ type ChecksTest struct{}
 type CheckStatus struct {
 }
 
-func (m *ChecksTest) CheckMarcos() *CheckStatus {
+func (m *ChecksTest) CheckMatias() *CheckStatus {
 	dag.Container().From("alpine:latest").
 		WithExec([]string{"apk", "add", "curl"}).
 		WithEnvVariable("CACHE_BUST", time.Now().String()).
