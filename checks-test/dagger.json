@@ -3,5 +3,12 @@
   "engineVersion": "v0.19.2",
   "sdk": {
     "source": "go"
-  }
+  },
+  "dependencies": [
+    {
+      "name": "calltest",
+      "source": "github.com/marcosnils/daggerverse/calltest@main",
+      "pin": "b278c1b133f3c78e453720fae81c0a2f53505155"
+    }
+  ]
 }
