@@ -14,9 +14,7 @@ func (m *ChecksTest) CheckMatias() *CheckStatus {
 	dag.Container().From("alpine:latest").
 		WithExec([]string{"apk", "add", "curl"}).
 		WithEnvVariable("CACHE_BUST", time.Now().String()).
-		WithExec([]string{"curl", "https://webhook.site/2c523046-94cb-45e6-8034-c3aea6e97990"}).Sync(context.Background())
+		WithExec([]string{"curl", "https://webhook.site/12f90a42-6a19-4864-86bf-f81f841ccc96"}).Sync(context.Background())
 	dag.Calltest().CheckTest(context.Background())
-	//trigger
-
 	return &CheckStatus{}
 }
