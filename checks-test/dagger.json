@@ -9,6 +9,10 @@
       "name": "calltest",
       "source": "github.com/marcosnils/daggerverse/calltest@main",
       "pin": "b278c1b133f3c78e453720fae81c0a2f53505155"
+    },
+    {
+      "name": "scaleout",
+      "source": "scaleout"
     }
   ],
   "disableDefaultFunctionCaching": true
