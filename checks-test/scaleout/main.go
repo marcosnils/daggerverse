@@ -21,7 +21,7 @@ import (
 type Scaleout struct{}
 
 func (m *Scaleout) Work(ctx context.Context) {
-	dag.Container().From("alpine").WithExec([]string{"echo", "doing some very tough work"}).
+	dag.Container().From("alpine").WithExec([]string{"echo", "doing some very tough work!"}).
 		WithExec([]string{"sleep", "10"}).Stdout(ctx)
 	return
 }
