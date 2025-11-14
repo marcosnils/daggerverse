@@ -11,9 +11,6 @@ type CheckStatus struct {
 
 // +check
 func (m *ChecksTest) CheckMatias(ctx context.Context) *CheckStatus {
-	//foo
-	//bar
-	//pepe
 	dag.Scaleout().Work(ctx)
 	return &CheckStatus{}
 }
