@@ -89,9 +89,9 @@ func New(
 		WithMountedTemp("/var/log").
 		WithExposedPort(6443)
 	return &K3S{
-		Name:        name,
-		ConfigCache: ccache,
-		Container:   ctr,
+		Name:          name,
+		ConfigCache:   ccache,
+		Container:     ctr,
 		EnableTraefik: enableTraefik,
 	}
 }
@@ -124,11 +124,14 @@ func (m *K3S) Config(ctx context.Context,
 	// +optional
 	// +default=false
 	local bool,
+	// +optional
+	// +default="alpine"
+	image string,
 
 ) *dagger.File {
 	const interval = 0.5
 	return dag.Container().
-		From("alpine").
+		From(image).
 		// we need to bust the cache so we don't fetch the same file each time.
 		WithEnvVariable("CACHE", time.Now().String()).
 		WithMountedCache("/cache/k3s", m.ConfigCache).
