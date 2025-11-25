@@ -20,6 +20,7 @@ func (m *ChecksTest) CheckMatias(ctx context.Context) *CheckStatus {
 	// moooo
 	// wowo
 	// wawa
+	// wiwi
 	dag.Scaleout().Work(ctx)
 	return &CheckStatus{}
 }
