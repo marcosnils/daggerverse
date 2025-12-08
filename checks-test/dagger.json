@@ -1,6 +1,6 @@
 {
   "name": "checks-test",
-  "engineVersion": "v0.19.6",
+  "engineVersion": "v0.19.7",
   "sdk": {
     "source": "go"
   },
@@ -9,10 +9,6 @@
       "name": "calltest",
       "source": "github.com/marcosnils/daggerverse/calltest@main",
       "pin": "b278c1b133f3c78e453720fae81c0a2f53505155"
-    },
-    {
-      "name": "scaleout",
-      "source": "scaleout"
     }
   ],
   "disableDefaultFunctionCaching": true
