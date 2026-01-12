@@ -48,6 +48,9 @@ type K3S struct {
 	// +private
 	EnableTraefik bool
 
+	// +private
+	Debug bool
+
 	Container *dagger.Container
 }
 
@@ -65,6 +68,11 @@ func New(
 	// enable traefik to be installed (not recommended).
 	// +default="false"
 	enableTraefik bool,
+
+	// enable debug logging from k3s server.
+	// +optional
+	// +default="false"
+	debug bool,
 ) *K3S {
 	ccache := dag.CacheVolume("k3s_config_" + name)
 	ctr := dag.Container().
@@ -89,15 +97,20 @@ func New(
 		WithMountedTemp("/var/log").
 		WithExposedPort(6443)
 	return &K3S{
-		Name:        name,
-		ConfigCache: ccache,
-		Container:   ctr,
+		Name:          name,
+		ConfigCache:   ccache,
+		Container:     ctr,
 		EnableTraefik: enableTraefik,
+		Debug:         debug,
 	}
 }
 
 // Returns a newly initialized kind cluster
 func (m *K3S) Server() *dagger.Service {
+	debugFlags := ""
+	if m.Debug {
+		debugFlags = "--debug "
+	}
 	traefikFlags := ""
 	if !m.EnableTraefik {
 		traefikFlags = "--disable traefik "
@@ -106,7 +119,7 @@ func (m *K3S) Server() *dagger.Service {
 		AsService(dagger.ContainerAsServiceOpts{
 			Args: []string{
 				"sh", "-c",
-				"k3s server --debug --bind-address $(ip route | grep src | awk '{print $NF}') " + traefikFlags + "--disable metrics-server --egress-selector-mode=disabled",
+				"k3s server " + debugFlags + "--bind-address $(ip route | grep src | awk '{print $NF}') " + traefikFlags + "--disable metrics-server --egress-selector-mode=disabled",
 			},
 			InsecureRootCapabilities: true,
 			UseEntrypoint:            true,
