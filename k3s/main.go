@@ -51,6 +51,9 @@ type K3S struct {
 	// +private
 	Debug bool
 
+	// +private
+	KubeletVerbosity int
+
 	Container *dagger.Container
 }
 
@@ -73,6 +76,11 @@ func New(
 	// +optional
 	// +default="false"
 	debug bool,
+
+	// kubelet log verbosity level (0=minimal, 1=errors/warnings, 2=info, 3+=debug).
+	// +optional
+	// +default="1"
+	kubeletVerbosity int,
 ) *K3S {
 	ccache := dag.CacheVolume("k3s_config_" + name)
 	ctr := dag.Container().
@@ -97,11 +105,12 @@ func New(
 		WithMountedTemp("/var/log").
 		WithExposedPort(6443)
 	return &K3S{
-		Name:          name,
-		ConfigCache:   ccache,
-		Container:     ctr,
-		EnableTraefik: enableTraefik,
-		Debug:         debug,
+		Name:             name,
+		ConfigCache:      ccache,
+		Container:        ctr,
+		EnableTraefik:    enableTraefik,
+		Debug:            debug,
+		KubeletVerbosity: kubeletVerbosity,
 	}
 }
 
@@ -115,11 +124,12 @@ func (m *K3S) Server() *dagger.Service {
 	if !m.EnableTraefik {
 		traefikFlags = "--disable traefik "
 	}
+	kubeletFlags := fmt.Sprintf("--kubelet-arg v=%d ", m.KubeletVerbosity)
 	return m.Container.
 		AsService(dagger.ContainerAsServiceOpts{
 			Args: []string{
 				"sh", "-c",
-				"k3s server " + debugFlags + "--bind-address $(ip route | grep src | awk '{print $NF}') " + traefikFlags + "--disable metrics-server --egress-selector-mode=disabled",
+				"k3s server " + debugFlags + "--bind-address $(ip route | grep src | awk '{print $NF}') " + traefikFlags + kubeletFlags + "--disable metrics-server --egress-selector-mode=disabled",
 			},
 			InsecureRootCapabilities: true,
 			UseEntrypoint:            true,
