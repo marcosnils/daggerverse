@@ -145,7 +145,7 @@ func (m *K3S) Config(ctx context.Context,
 		// we need to bust the cache so we don't fetch the same file each time.
 		WithEnvVariable("CACHE", time.Now().String()).
 		WithMountedCache("/cache/k3s", m.ConfigCache).
-		WithExec([]string{"sh", "-c", `while [ ! -f "/cache/k3s/k3s.yaml" ]; do echo "k3s.yaml not ready, is sever started?. waiting.. " && sleep ` + fmt.Sprintf("%.1f", interval) + `; done`}).
+		WithExec([]string{"sh", "-c", `while [ ! -f "/cache/k3s/k3s.yaml" ]; do echo "k3s.yaml not ready, is server started?. waiting.. " && sleep ` + fmt.Sprintf("%.1f", interval) + `; done`}).
 		WithExec([]string{"cp", "/cache/k3s/k3s.yaml", "k3s.yaml"}).
 		With(func(c *dagger.Container) *dagger.Container {
 			if local {
